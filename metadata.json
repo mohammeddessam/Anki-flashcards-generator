@@ -1,0 +1,6 @@
+{
+  "name": "AnKing Flashcard Generator",
+  "description": "Professional tool for converting medical text into AnKing-style cloze deletion flashcards with strict HTML formatting for Anki import.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
