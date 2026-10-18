@@ -8,3 +8,9 @@ createRoot(document.getElementById('root')!).render(
     <App />
   </StrictMode>,
 );
+
+// Console helpers for manually exercising the browser-only export paths.
+// Tree-shaken out of production builds.
+if (import.meta.env.DEV) {
+  void import('./devtools').then(m => m.installDevTools());
+}
