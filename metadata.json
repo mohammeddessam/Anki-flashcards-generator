@@ -1,6 +1,6 @@
 {
   "name": "AnKing Flashcard Generator",
-  "description": "Professional tool for converting medical text into AnKing-style cloze deletion flashcards with strict HTML formatting for Anki import.",
+  "description": "Converts medical study documents into AnKing-style cloze flashcards with source citations, hierarchical Anki tags, Excel export and .apkg deck export.",
   "requestFramePermissions": [],
   "majorCapabilities": []
 }
