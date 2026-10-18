@@ -54,7 +54,10 @@ export const buildWorkbook = async ({
   qcNotes = [],
   maxEmbeddedBytes = DEFAULT_MAX_EMBEDDED_BYTES,
 }: XlsxOptions): Promise<XlsxResult> => {
-  const ExcelJS = await import('exceljs');
+  // exceljs is CommonJS: bundlers expose its exports on the namespace, plain
+  // Node puts them under `default`. Accept either so this works in both.
+  const mod = await import('exceljs');
+  const ExcelJS = ((mod as unknown as {default?: typeof mod}).default ?? mod) as typeof mod;
   const workbook = new ExcelJS.Workbook();
   workbook.creator = 'AnKing Card Studio';
   workbook.created = new Date();

@@ -33,20 +33,24 @@ export const detectHeading = (line: string): {title: string; level: number} | nu
     return title ? {title, level: Math.min(markdown[1].length - 1, 3)} : null;
   }
 
-  // "1.2.3 Title" / "1. Title" / "II. Title"
-  const numbered = /^((?:\d+|[IVXLC]+)(?:\.\d+)*)[.)]?\s+(\S.*)$/.exec(raw);
-  if (numbered && !/[.!?]$/.test(raw)) {
-    const title = cleanHeading(numbered[2]);
-    const depth = (numbered[1].match(/\./g) ?? []).length;
-    return title ? {title, level: Math.min(depth, 3)} : null;
-  }
-
   const stripped = cleanHeading(raw);
   if (!stripped || NOISE.test(stripped)) return null;
 
   const words = stripped.split(/\s+/);
   if (words.length > 10) return null;
+  // Prose punctuation, including the comma that ends a wrapped list item.
   if (/[.!?,;]$/.test(stripped)) return null;
+
+  // "1.2.3 Title" / "1. Title" / "II. Title". Kept short, because a numbered
+  // list of facts looks identical to a numbered list of section titles and
+  // only length tells them apart.
+  const numbered = /^((?:\d+|[IVXLC]+)(?:\.\d+)*)[.)]?\s+(\S.*)$/.exec(raw);
+  if (numbered) {
+    const title = cleanHeading(numbered[2]);
+    if (!title || title.split(/\s+/).length > 6) return null;
+    const depth = (numbered[1].match(/\./g) ?? []).length;
+    return {title, level: Math.min(depth, 3)};
+  }
 
   // Shouty headings, e.g. "HEART FAILURE".
   const letters = stripped.replace(/[^A-Za-z]/g, '');
@@ -54,8 +58,13 @@ export const detectHeading = (line: string): {title: string; level: number} | nu
     return {title: toTitleCase(stripped), level: 0};
   }
 
-  // "Heart failure:" or "Management of heart failure:"
-  if (/:$/.test(raw)) return {title: stripped, level: 1};
+  // "Heart failure:" or "Management of heart failure:". A colon also ends a
+  // sentence that introduces a list, so this stays short and must start like a
+  // title rather than mid-sentence.
+  if (/:$/.test(raw)) {
+    if (words.length > 4 || !/^[A-Z0-9]/.test(stripped)) return null;
+    return {title: stripped, level: 1};
+  }
 
   // Title Case line with no terminal punctuation.
   const capitalised = words.filter(w => /^[A-Z]/.test(w)).length;

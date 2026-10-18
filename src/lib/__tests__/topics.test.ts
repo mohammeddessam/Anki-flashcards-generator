@@ -36,6 +36,23 @@ describe('heading detection', () => {
     });
   });
 
+  it('ignores numbered facts, which look like numbered sections', () => {
+    expect(detectHeading('1. Ischaemic chest pain lasting more than 20 minutes at rest.')).toBeNull();
+    expect(detectHeading('2. ECG changes: ST elevation >= 1 mm in two contiguous leads,')).toBeNull();
+    expect(detectHeading('3. A rise in high-sensitivity cardiac troponin above the 99th')).toBeNull();
+    // A genuinely short numbered section title still counts.
+    expect(detectHeading('4. Pharmacological Therapy')).toEqual({
+      title: 'Pharmacological Therapy',
+      level: 0,
+    });
+  });
+
+  it('ignores a sentence that merely introduces a list', () => {
+    expect(detectHeading('Diagnosis rests on three findings:')).toBeNull();
+    // A wrapped sentence continuation never starts a section.
+    expect(detectHeading('should be started early and titrated in parallel:')).toBeNull();
+  });
+
   it('ignores prose, page furniture and over-long lines', () => {
     expect(detectHeading('The patient presented with chest pain and was admitted.')).toBeNull();
     expect(detectHeading('Page 12')).toBeNull();
